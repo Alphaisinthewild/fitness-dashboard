@@ -3,19 +3,32 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Layout/Header'
 import Sidebar from './components/Layout/Sidebar'
 import TodaySummary from './components/Dashboard/TodaySummary'
+import WeeklyTrends from './pages/WeeklyTrends'
+import WorkoutDetail from './pages/WorkoutDetail'
+import NutritionBreakdown from './pages/NutritionBreakdown'
+import ProgressDashboard from './pages/ProgressDashboard'
 import Setup from './pages/Setup'
+import useFitnessStore from './store/fitnessStore'
+import { seedDataIfEmpty } from './api/mockData'
 import './App.css'
 
 export default function App() {
   const [apiKeysConfigured, setApiKeysConfigured] = useState(false)
+  const loadAll = useFitnessStore(s => s.loadAll)
 
   useEffect(() => {
-    // Check if API keys are in localStorage
-    const hasKeys = localStorage.getItem('fitbodKey') && 
-                    localStorage.getItem('mfpKey') && 
+    const hasKeys = localStorage.getItem('fitbodKey') &&
+                    localStorage.getItem('mfpKey') &&
                     localStorage.getItem('wyzeKey')
     setApiKeysConfigured(!!hasKeys)
   }, [])
+
+  useEffect(() => {
+    if (apiKeysConfigured) {
+      seedDataIfEmpty()
+      loadAll()
+    }
+  }, [apiKeysConfigured, loadAll])
 
   if (!apiKeysConfigured) {
     return <Setup onSetupComplete={() => setApiKeysConfigured(true)} />
@@ -27,10 +40,14 @@ export default function App() {
         <Header />
         <div className="flex">
           <Sidebar />
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-8 overflow-auto">
             <Routes>
               <Route path="/" element={<TodaySummary />} />
-              {/* More routes will be added */}
+              <Route path="/trends" element={<WeeklyTrends />} />
+              <Route path="/workouts" element={<WorkoutDetail />} />
+              <Route path="/nutrition" element={<NutritionBreakdown />} />
+              <Route path="/progress" element={<ProgressDashboard />} />
+              <Route path="/setup" element={<Setup onSetupComplete={() => {}} />} />
             </Routes>
           </main>
         </div>
