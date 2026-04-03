@@ -13,6 +13,12 @@ const useFitnessStore = create((set, get) => ({
   weeklyWorkouts: {},
   // Body composition history
   bodyCompHistory: [],
+  // OAuth Configuration
+  oauth: {
+    clientId: import.meta.env.VITE_OAUTH_CLIENT_ID || '075d2ee3-33db-4283-80e9-4d8733593147',
+    clientSecret: import.meta.env.VITE_OAUTH_CLIENT_SECRET || '',
+    privacyPolicyUrl: import.meta.env.VITE_OAUTH_PRIVACY_POLICY || 'https://alphaisinthewild.github.io/skadi-presentations/privacy.md',
+  },
   // Goals
   goals: {
     calories: 2250,
@@ -22,6 +28,29 @@ const useFitnessStore = create((set, get) => ({
     steps: 10000,
     startingWeight: 335,
     targetWeight: 180,
+  },
+
+  // Update OAuth configuration
+  setOAuth: (config) => {
+    set(state => ({
+      oauth: { ...state.oauth, ...config }
+    }))
+    localStorage.setItem('oauth-config', JSON.stringify(config))
+  },
+
+  // Load OAuth from localStorage (on init)
+  loadOAuthConfig: () => {
+    const stored = localStorage.getItem('oauth-config')
+    if (stored) {
+      try {
+        const config = JSON.parse(stored)
+        set(state => ({
+          oauth: { ...state.oauth, ...config }
+        }))
+      } catch (e) {
+        console.warn('Failed to load OAuth config from localStorage:', e)
+      }
+    }
   },
 
   // Load all data from localStorage
@@ -39,6 +68,8 @@ const useFitnessStore = create((set, get) => ({
     }
     const bodyCompHistory = loadBodyCompHistory()
     set({ todayNutrition, todayWorkouts, weeklyNutrition, weeklyWorkouts, bodyCompHistory })
+    // Also load OAuth config
+    get().loadOAuthConfig()
   },
 
   // Save nutrition for a date
