@@ -63,6 +63,62 @@ const useFitnessStore = create((set, get) => ({
     }))
   },
 
+  // Add daily entry (nutrition + workout + measurements + supplements)
+  addDailyEntry: (entry) => {
+    const dateKey = entry.date || getTodayKey()
+    
+    // Save nutrition
+    if (entry.nutrition) {
+      const nutrition = {
+        calories: entry.nutrition.calories,
+        protein: entry.nutrition.protein,
+        carbs: entry.nutrition.carbs,
+        fat: entry.nutrition.fat,
+        date: dateKey,
+      }
+      saveDay(dateKey, 'nutrition', nutrition)
+    }
+
+    // Save workout
+    if (entry.workout && (entry.workout.caloriesBurned || entry.workout.timeInGym)) {
+      const workout = {
+        date: dateKey,
+        caloriesBurned: entry.workout.caloriesBurned,
+        duration: entry.workout.timeInGym,
+        muscleGroups: entry.workout.muscleGroups,
+        volume: 0, // Can be calculated later
+      }
+      const existing = loadDay(dateKey, 'workouts') || []
+      const updated = [...existing, workout]
+      saveDay(dateKey, 'workouts', updated)
+    }
+
+    // Save measurements
+    if (entry.measurements) {
+      const comp = {
+        date: dateKey,
+        weight: entry.measurements.weight,
+        musclePercent: entry.measurements.leanMuscle ? ((entry.measurements.leanMuscle / entry.measurements.weight) * 100) : null,
+        fatPercent: entry.measurements.fatPercent,
+        bmi: entry.measurements.weight ? 703 * (entry.measurements.weight / (70 * 70)) : null,
+      }
+      saveBodyComp(comp)
+    }
+
+    // Save supplements (localStorage as is)
+    if (entry.supplements) {
+      localStorage.setItem(`supplements-${dateKey}`, JSON.stringify(entry.supplements))
+    }
+
+    // Save steps
+    if (entry.steps) {
+      localStorage.setItem(`steps-${dateKey}`, entry.steps.toString())
+    }
+
+    // Reload all
+    get().loadAll()
+  },
+
   // Save body composition
   saveBodyComp: (data) => {
     saveBodyComp(data)

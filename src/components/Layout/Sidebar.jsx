@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 export default function Sidebar() {
   const navItems = [
     { label: 'Today', path: '/', icon: '📊' },
+    { label: 'Daily Entry', path: '/entry', icon: '📝' },
     { label: 'Weekly Trends', path: '/trends', icon: '📈' },
     { label: 'Workouts', path: '/workouts', icon: '🏋️' },
     { label: 'Nutrition', path: '/nutrition', icon: '🥗' },

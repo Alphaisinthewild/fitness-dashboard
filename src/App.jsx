@@ -8,27 +8,18 @@ import WorkoutDetail from './pages/WorkoutDetail'
 import NutritionBreakdown from './pages/NutritionBreakdown'
 import ProgressDashboard from './pages/ProgressDashboard'
 import Setup from './pages/Setup'
+import DailyDataEntry from './pages/DailyDataEntry'
 import useFitnessStore from './store/fitnessStore'
 import { seedDataIfEmpty } from './api/mockData'
 import './App.css'
 
 export default function App() {
-  const [apiKeysConfigured, setApiKeysConfigured] = useState(false)
   const loadAll = useFitnessStore(s => s.loadAll)
 
   useEffect(() => {
-    const hasKeys = localStorage.getItem('fitbodKey') &&
-                    localStorage.getItem('mfpKey') &&
-                    localStorage.getItem('wyzeKey')
-    setApiKeysConfigured(!!hasKeys)
-  }, [])
-
-  useEffect(() => {
-    if (apiKeysConfigured) {
-      seedDataIfEmpty()
-      loadAll()
-    }
-  }, [apiKeysConfigured, loadAll])
+    seedDataIfEmpty()
+    loadAll()
+  }, [loadAll])
 
   if (!apiKeysConfigured) {
     return <Setup onSetupComplete={() => setApiKeysConfigured(true)} />
@@ -43,6 +34,7 @@ export default function App() {
           <main className="flex-1 p-8 overflow-auto">
             <Routes>
               <Route path="/" element={<TodaySummary />} />
+              <Route path="/entry" element={<DailyDataEntry />} />
               <Route path="/trends" element={<WeeklyTrends />} />
               <Route path="/workouts" element={<WorkoutDetail />} />
               <Route path="/nutrition" element={<NutritionBreakdown />} />
